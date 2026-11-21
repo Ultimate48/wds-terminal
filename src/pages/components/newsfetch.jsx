@@ -46,9 +46,9 @@ function RoundNews() {
   useEffect(() => {
     if (currentRound === null) return;
 
-    // If Round 0, clear news so pre-game notice displays
+    // If Round 0, show initial round notice
     if (currentRound === 0) {
-      setNews([]);
+      setNews(["Initial round on the go"]);
       return;
     }
 
@@ -57,21 +57,28 @@ function RoundNews() {
         const cumulativeNews = [];
         // Loop backwards from currentRound down to 1 so newer news is on top
         for (let r = currentRound; r >= 1; r--) {
+          let roundNewsFound = false;
           if (rtdbUrl) {
             const res = await fetch(`${rtdbUrl}/news/round_${r}.json`);
             if (res.ok) {
               const data = await res.json();
-              if (data && Array.isArray(data.news)) {
+              if (data && Array.isArray(data.news) && data.news.length > 0) {
                 cumulativeNews.push(...data.news);
+                roundNewsFound = true;
               }
             }
-          } else if (db) {
+          }
+          if (!roundNewsFound && db) {
             const roundDocRef = doc(db, "news", `round_${r}`); 
             const roundDocSnap = await getDoc(roundDocRef);
-            if (roundDocSnap.exists()) {
-              const list = roundDocSnap.data().news || [];
+            if (roundDocSnap.exists() && roundDocSnap.data().news?.length > 0) {
+              const list = roundDocSnap.data().news;
               cumulativeNews.push(...list);
+              roundNewsFound = true;
             }
+          }
+          if (!roundNewsFound && r === 3) {
+            cumulativeNews.push("IPO");
           }
         }
         setNews(cumulativeNews);
@@ -83,7 +90,7 @@ function RoundNews() {
     fetchCumulativeNews();
   }, [currentRound]);
 
-  return <InfiniteScroller newsData={news} />;
+  return <InfiniteScroller newsData={news} currentRound={currentRound} />;
 }
 
 export default RoundNews;

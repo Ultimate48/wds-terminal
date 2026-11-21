@@ -1,10 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
-import Econ from './assets/ec.png';
-import NewsBox from './components/NewsBox';
 import Stocks from './components/Stocks';
 import RoundNews from './components/newsfetch';
 import PinBoard from './components/PinBoard';
-
+import { BookOpen } from 'lucide-react';
+import econLogo from './assets/Econ(White).png';
+import wdsLogo from './assets/wdslogo.png';
 
 export const SelectedStocksContext = createContext();
 
@@ -12,41 +12,21 @@ function Home() {
   const [selectedCryptos, setSelectedCryptos] = useState([]);
   const [initialized, setInitialized] = useState(false);
 
-  
   useEffect(() => {
     const saved = localStorage.getItem("selectedCryptos");
-    
     if (saved) {
-      
-      setSelectedCryptos(JSON.parse(saved));
-    } else {
-      
-      const allStocks = [
-        "Ixigo", "CAMS", "Coforge", "Power Grid Corp", "Max Healthcare", 
-        "Ashok Leyland", "Page Industries", "Godrej Properties", "Granules India", 
-        "Balrampur Chini Mills", "Redington", "ONGC", "Divi's Laboratories", 
-        "Muthoot Finance", "Polycab India", "Supreme Industries", "Tube Investments", 
-        "Trident", "Gokaldas Exports", "HCL Technologies", "Cipla", "Lupin", 
-        "Dabur India", "Mankind Pharma", "Bharat Petroleum", "Biocon", "Uno Minda", 
-        "EMS Limited", "UltraTech Cement", "Tech Mahindra", "Blue Star", 
-        "Hindustan Zinc", "Blue Dart Express", "Motilal Oswal Financial Services", 
-        "Bosch", "West Coast Paper Mills", "Life Insurance Corporation of India", 
-        "Hindalco Industries", "HDFC Life Insurance", "Zydus Lifesciences"
-      ];
-      
-      const shuffled = [...allStocks].sort(() => 0.5 - Math.random());
-      const random10 = shuffled.slice(0, 10);
-      
-      setSelectedCryptos(random10);
-      localStorage.setItem("selectedCryptos", JSON.stringify(random10));
-      
-      console.log("✅ First visit! Selected 10 random stocks:", random10);
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setSelectedCryptos(parsed);
+        }
+      } catch (e) {
+        console.error("Error reading saved stocks:", e);
+      }
     }
-    
     setInitialized(true);
   }, []);
 
-  
   const updateSelectedCryptos = (newSelection) => {
     setSelectedCryptos(newSelection);
     localStorage.setItem("selectedCryptos", JSON.stringify(newSelection));
@@ -54,30 +34,65 @@ function Home() {
 
   if (!initialized) {
     return (
-      <div className='w-screen h-screen bg-[#0B091A] flex items-center justify-center'>
-        <p className='text-white text-xl'>Loading...</p>
+      <div className="w-screen h-screen bg-[#0E0E10] flex items-center justify-center">
+        <p className="text-zinc-400 text-sm font-medium">Loading exchange...</p>
       </div>
     );
   }
 
   return (
     <SelectedStocksContext.Provider value={{ selectedCryptos, updateSelectedCryptos }}>
-      <div className='w-screen h-full bg-[#0B091A] overflow-x-hidden relative'>
-        {/* RuleBook Link */}
-        <a 
-          href='https://www.instagram.com/p/DQzJ5COj493/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==' 
-          target='_blank' 
-          rel='noopener noreferrer'
-          className='absolute pt-[3%] md:pt-[6%] right-0 pr-[6%] text-lg md:text-4xl text-white DMSans font-bold'
-        >
-          RuleBook
-        </a>
+      <div className="min-h-screen w-full bg-[#0E0E10] text-zinc-100 selection:bg-red-700 selection:text-white">
         
-        {/* Main Content */}
-        <img src={Econ} alt='Econ' className='w-[20%] h-auto pt-[0.3%] pl-[0.5%]' />
+        {/* Top Header with Econ & WDS Logos */}
+        <header className="border-b border-zinc-800 bg-[#121215]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            {/* Top Left: First Econ, then | separator, then WDS */}
+            <div className="flex items-center gap-3">
+              <img
+                src={econLogo}
+                alt="Econ"
+                className="h-8 sm:h-10 w-auto object-contain"
+              />
+              <span className="text-zinc-600 text-lg font-light select-none">|</span>
+              <img
+                src={wdsLogo}
+                alt="WDS"
+                className="h-8 sm:h-10 w-auto object-contain"
+              />
+            </div>
+
+            {/* Top Right: RuleBook Action */}
+            <div className="flex items-center gap-3">
+              <a
+                href="https://www.instagram.com/p/DgAL5x7ER5a/?jplx=MWthNGVwYTVtaGR6Ng=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>RuleBook</span>
+              </a>
+            </div>
+
+          </div>
+        </header>
+
+        {/* PinBoard (Watchlist) */}
         <PinBoard />
-        <RoundNews /> {/* Render NewsBox which will fetch and display round 1 news */}
+
+        {/* Round News Feed */}
+        <RoundNews />
+
+        {/* Master Stock & Circuit Table */}
         <Stocks />
+
+        {/* Clean Footer */}
+        <footer className="border-t border-zinc-800/80 bg-[#121215] py-6 text-center text-xs text-zinc-500">
+          <p className="text-zinc-400 font-semibold">WOLF OF DALAL STREET | ECON</p>
+        </footer>
+
       </div>
     </SelectedStocksContext.Provider>
   );

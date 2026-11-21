@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { ExternalLink } from "lucide-react";
 
-const InfiniteScroller = ({ newsData = [] }) => {
+const InfiniteScroller = ({ newsData = [], currentRound = null }) => {
   const staticNews = [
-    "Game is about to start . start buying stocks",
+    "Initial round on the go",
   ];
   const initialNews = newsData.length > 0 ? newsData.slice(0, 6) : staticNews;
 
@@ -32,7 +33,7 @@ const InfiniteScroller = ({ newsData = [] }) => {
         }
         return [...prevNews, ...nextItems];
       });
-    }, 1000);
+    }, 600);
   }, [newsData]);
 
   useEffect(() => {
@@ -48,13 +49,23 @@ const InfiniteScroller = ({ newsData = [] }) => {
   }, [loadMoreNews, hasMore]);
 
   return (
-    <div className="w-screen h-screen flex flex-col items-center justify-center bg-auto p-4">
-      <h2 className="text-4xl font-bold text-center mb-[1%] text-[#E1DFEC] DMSans">
-        Activity
-      </h2>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 bg-red-600 rounded-sm inline-block" />
+          <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+            Round Activity & Announcements
+          </h2>
+        </div>
+        <span className="text-xs font-medium text-zinc-400">
+          {currentRound === 0 ? "Initial round on the go" : currentRound === 3 ? "IPO" : currentRound ? `Round ${currentRound}` : "Live feed"}
+        </span>
+      </div>
 
-      <div className="flex flex-col w-full max-w-[90vw] lg:max-w-[70vw] h-[70vh] md:h-[60vh] p-4 border border-[#110E22] rounded-lg bg-[rgb(16,14,33)] shadow-lg DMSans">
-        <div className="flex-grow overflow-y-auto scrollbar-hide space-y-4 p-[1%] bg-[#110E22]">
+      {/* Feed Container */}
+      <div className="w-full max-h-[260px] h-[220px] p-3 border border-zinc-800 rounded bg-[#131316] flex flex-col">
+        <div className="flex-grow overflow-y-auto space-y-2 pr-1">
           {news.length > 0 ? (
             news.map((item, index) => {
               const isLink =
@@ -63,30 +74,36 @@ const InfiniteScroller = ({ newsData = [] }) => {
               return (
                 <div
                   key={index}
-                  className="p-[2%] bg-[#15112b] rounded-lg shadow-md text-center text-md md:text-lg font-semibold text-[#E1DFEC] min-h-[50px] w-full"
+                  className="p-3 bg-zinc-900 border border-zinc-800/80 rounded text-xs sm:text-sm text-zinc-200 flex items-start gap-2.5"
                 >
-                  {isLink ? (
-                    <a
-                      href={item}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 underline break-all"
-                    >
-                     Budget
-                    </a>
-                  ) : (
-                    item
-                  )}
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 mt-1.5 shrink-0" />
+                  <div className="flex-1">
+                    {isLink ? (
+                      <a
+                        href={item}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-red-400 hover:text-red-300 underline font-medium inline-flex items-center gap-1"
+                      >
+                        <span>Budget Document</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span>{item}</span>
+                    )}
+                  </div>
                 </div>
               );
             })
           ) : (
-            <p className="text-center text-gray-400">No news available</p>
+            <p className="text-center text-zinc-500 py-8 text-xs">
+              No news announcements yet.
+            </p>
           )}
 
           {hasMore && (
-            <div ref={loaderRef} className="text-center text-gray-400 py-4">
-              Loading more news...
+            <div ref={loaderRef} className="text-center text-zinc-500 text-xs py-2 font-medium">
+              Loading older updates...
             </div>
           )}
         </div>
